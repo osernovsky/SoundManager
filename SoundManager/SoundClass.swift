@@ -4,43 +4,30 @@ import UIKit
 
 class SoundManager: NSObject {
     
-    static let shared = SoundManager()
+    static let shared = SoundManager() // Синглтон
     
-    // Флаг активной паузы от сворачивания приложения
+    // Флаг активной паузы сворачивания приложения
     private var isPausedBySystem = false
     
     private var musicPlayer: AVAudioPlayer! // Плейер фоновой музыки
     private var soundPlayers: [AVAudioPlayer] = [] // Массив плейеров звуковых эффектов
     
-    // Закрываем инициализатор
     private override init() {
         super.init()
     }
 
-    deinit {
-        
-        // Отписка от уведомлений
+    deinit {        
+        // Отписка от уведомлений в деинициализаторе
         NotificationCenter.default.removeObserver(self)
     }
     
-    // Настройка подписки на уведомления
+    // MARK: Настройка подписки на уведомления
     func setupNotificationObservers() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAppDidEnterBackground),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAppDidBecomeActive),
-            name: UIApplication.didBecomeActiveNotification,
-            object: nil
-        )
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
-    // MARK: Функция проигрывания фоновой музыки
-    
+    // MARK: Функция проигрывания фоновой музыки    
     func playMusic(named musicName: String, withExtension extensionName: String = "mp3", loop: Bool = true, volume: Float = 100) {
         
         if let musicURL = Bundle.main.url(forResource: musicName, withExtension: extensionName) {
@@ -54,13 +41,11 @@ class SoundManager: NSObject {
                 print("Error loading music: \(error)")
             }
         } else {
-            print("Error loading music")
-        }
-        
+            print("Error playing music")
+        }     
     }
     
-    // MARK: Функция проигрывания звуков
-    
+    // MARK: Функция проигрывания звуков    
     func playSound(named soundName: String, withExtension extensionName: String = "mp3", volume: Float = 100) {
         
         if let soundURL = Bundle.main.url(forResource: soundName, withExtension: extensionName) {
@@ -69,23 +54,17 @@ class SoundManager: NSObject {
                 player.prepareToPlay()
                 player.volume = volume / 100
                 player.play()
-                
-                // Добавляем плейер в массив
-                soundPlayers.append(player)
-                
-                // Удаляем из массива по окончании воспроизведения
-                player.delegate = self
-                
-                
+                soundPlayers.append(player) // Добавляем плейер в массив
+                player.delegate = self // Удаляем из массива по окончании воспроизведения
             } catch {
                 print("Error loading music: \(error)")
             }
         } else {
-            print("Error loading sound")
+            print("Error playing sound")
         }
     }
     
-    // Останов проигрывания музыки
+    // Остановка проигрывания музыки
     func stopMusic() {
         if musicPlayer != nil {
             musicPlayer?.stop()
@@ -93,7 +72,7 @@ class SoundManager: NSObject {
         }
     }
     
-    // Останов всех звуковых эффектов
+    // Остановка всех звуковых эффектов
     func stopAllSound() {
         for player in soundPlayers {
             player.stop()
@@ -108,7 +87,7 @@ class SoundManager: NSObject {
         }
     }
     
-    // Изменение громкости последнего звукового эффекта
+    // Изменение громкости всех звуковых эффектов
     func setSoundVolume(_ volume: Float) {
         if volume > 0.0 && volume <= 100 {
             if !soundPlayers.isEmpty {
