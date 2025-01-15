@@ -1,4 +1,4 @@
-//  _________________
+//  
 //  ContentView.swift
 //  SoundManager
 //
